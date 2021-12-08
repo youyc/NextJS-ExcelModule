@@ -30,8 +30,6 @@ const Excel: NextPage = () => {
         const data = XLSX.utils.sheet_to_json(ws)
 
         /* Update state */
-        // setData(data)
-        // setCols(make_cols(ws["!ref"]))
         resolve(data)
       }
       reader.onerror = (error) => {
@@ -48,16 +46,18 @@ const Excel: NextPage = () => {
   return (
     <main className={styles.main}>
       <div>
-        <Button
-          variant="contained"
-          onClick={() => console.log("Upload Excel File")}
-          onInput={(e) => {
-            readExcel(e.currentTarget.value) // wrong event.item
-            // e.target.value = null
-          }}
-        >
+        <Button variant="contained" component="label">
           Upload Excel File
-          <input type="file" style={{ display: "none" }} />
+          <input
+            id="fileUpload"
+            type="file"
+            hidden
+            onChange={(event) => {
+              const file = event.target.files?.item(0)
+              // console.log(file)
+              if (file != null) readExcel(file)
+            }}
+          />
         </Button>
       </div>
     </main>

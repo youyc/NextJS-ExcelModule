@@ -15,8 +15,19 @@ const Excel: NextPage = () => {
   //   const [data, setData] = useState([])
   //   const [cols, setCols] = useState([])
 
+  const cols = [
+    { name: "A", key: 0 },
+    { name: "B", key: 1 },
+    { name: "C", key: 2 },
+  ]
+  const data = [
+    ["id", "name", "value"],
+    [1, "sheetjs", 7262],
+    [2, "js-xlsx", 6969],
+  ]
+
   // react code for excel reader
-  const readExcel = (file: any) => {
+  const readExcelFile = (file: any) => {
     const promise = new Promise((resolve, reject) => {
       const reader: FileReader = new FileReader()
       reader.readAsArrayBuffer(file)
@@ -33,6 +44,8 @@ const Excel: NextPage = () => {
 
         /* Convert array of arrays */
         const data = XLSX.utils.sheet_to_json(ws)
+
+        //another data format return
         // const data = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true })
         //return data
 
@@ -50,24 +63,46 @@ const Excel: NextPage = () => {
     })
   }
 
+  const createExcelFile = () => {
+    /* convert state to workbook */
+    const ws = XLSX.utils.aoa_to_sheet(data)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, "SheetJS")
+    /* generate XLSX file and send to client */
+    XLSX.writeFile(wb, "sheetjs.xlsx")
+    console.log("New file created")
+  }
+
   return (
     <main className={styles.main}>
       <div>
-        <Button variant="contained" component="label">
-          Upload Excel File
-          <input
-            id="fileUpload"
-            type="file"
-            hidden
-            onChange={(event) => {
-              const file = event.target.files?.item(0)
-              // console.log(file)
-              if (file != null) {
-                readExcel(file)
-              }
+        <div>
+          <Button variant="contained" component="label">
+            Upload Excel File
+            <input
+              id="fileUpload"
+              type="file"
+              hidden
+              onChange={(event) => {
+                const file = event.target.files?.item(0)
+                // console.log(file)
+                if (file != null) {
+                  readExcelFile(file)
+                }
+              }}
+            />
+          </Button>
+        </div>
+        <div>
+          <Button
+            variant="contained"
+            onClick={() => {
+              createExcelFile()
             }}
-          />
-        </Button>
+          >
+            Create New Excel File
+          </Button>
+        </div>
       </div>
     </main>
   )

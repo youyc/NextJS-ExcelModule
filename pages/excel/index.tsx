@@ -7,27 +7,34 @@ import { useState } from "react"
 
 // Module
 //SheetJS
-import XLSX, { read } from "xlsx"
+// import XLSX, { read, write, utils } from "xlsx"
+import * as XLSX from "xlsx"
 import { resolve } from "path"
 
 const Excel: NextPage = () => {
   //   const [data, setData] = useState([])
   //   const [cols, setCols] = useState([])
 
+  // react code for excel reader
   const readExcel = (file: any) => {
     const promise = new Promise((resolve, reject) => {
-      const reader = new FileReader()
+      const reader: FileReader = new FileReader()
       reader.readAsArrayBuffer(file)
 
       reader.onload = (e: any) => {
         /* Parse data */
-        const arrayBuffer = e.target.result
-        const wb = XLSX.read(arrayBuffer, { type: "buffer" })
+        const arrayBuffer: any = e.target.result
+        const wb: XLSX.WorkBook = XLSX.read(arrayBuffer, { type: "buffer" })
+
         /* Get first worksheet */
-        const wsname = wb.SheetNames[0]
-        const ws = wb.Sheets[wsname]
+        const ws: XLSX.WorkSheet = wb.Sheets[wb.SheetNames[0]]
+        // const wsname = wb.SheetNames[0]
+        // const ws = wb.Sheets[wsname]
+
         /* Convert array of arrays */
         const data = XLSX.utils.sheet_to_json(ws)
+        // const data = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true })
+        //return data
 
         /* Update state */
         resolve(data)
@@ -55,7 +62,9 @@ const Excel: NextPage = () => {
             onChange={(event) => {
               const file = event.target.files?.item(0)
               // console.log(file)
-              if (file != null) readExcel(file)
+              if (file != null) {
+                readExcel(file)
+              }
             }}
           />
         </Button>

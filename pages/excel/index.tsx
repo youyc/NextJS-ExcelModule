@@ -20,34 +20,39 @@ const Excel: NextPage = () => {
     { name: "B", key: 1 },
     { name: "C", key: 2 },
   ]
-  const data = [
+  // const data = [
+  //   ["id", "name", "value"],
+  //   [1, "sheetjs", 7262],
+  //   [2, "js-xlsx", 6969],
+  // ]
+
+  const data2 = [
     ["id", "name", "value"],
     [1, "sheetjs", 7262],
     [2, "js-xlsx", 6969],
   ]
 
   // react code for excel reader
-  const readExcelFile = (file: any) => {
-    const promise = new Promise((resolve, reject) => {
+  const read_excel_file = async (file: any) => {
+    var data: any = null
+    await new Promise((resolve, reject) => {
       const reader: FileReader = new FileReader()
       reader.readAsArrayBuffer(file)
-
       reader.onload = (e: any) => {
         /* Parse data */
         const arrayBuffer: any = e.target.result
-        const wb: XLSX.WorkBook = XLSX.read(arrayBuffer, { type: "buffer" })
+        const workbook: XLSX.WorkBook = XLSX.read(arrayBuffer, {
+          type: "buffer",
+        })
 
         /* Get first worksheet */
-        const ws: XLSX.WorkSheet = wb.Sheets[wb.SheetNames[0]]
+        const worksheet: XLSX.WorkSheet =
+          workbook.Sheets[workbook.SheetNames[0]]
         // const wsname = wb.SheetNames[0]
         // const ws = wb.Sheets[wsname]
 
         /* Convert array of arrays */
-        const data = XLSX.utils.sheet_to_json(ws)
-
-        //another data format return
-        // const data = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true })
-        //return data
+        const data = XLSX.utils.sheet_to_json(worksheet)
 
         /* Update state */
         resolve(data)
@@ -56,21 +61,33 @@ const Excel: NextPage = () => {
         reject(error)
       }
       //   reader.readAsArrayBuffer(file)
+    }).then((d: any) => {
+      data = d
     })
 
-    promise.then((d) => {
-      console.log(d)
-    })
+    return data
   }
 
-  const createExcelFile = () => {
+  const create_excel_file = () => {
     /* convert state to workbook */
-    const ws = XLSX.utils.aoa_to_sheet(data)
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, "SheetJS")
+    const worksheet = XLSX.utils.aoa_to_sheet(data2) // data variable
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "SheetJS")
     /* generate XLSX file and send to client */
-    XLSX.writeFile(wb, "sheetjs.xlsx")
+    XLSX.writeFile(workbook, "sheetjs.xlsx")
     console.log("New file created")
+  }
+
+  const edit_excel_file = async (file: any) => {
+    //need to install @type/node - using fs library for the file access
+    // var fs = require("fs")
+    const filename: string = file["name"]
+    const workbook = await fs.XLSX.readFileSync(filename)
+    const worksheet: XLSX.WorkSheet = workbook.Sheets[workbook.SheetNames[0]]
+    // console.log(worksheet)
+    // const data: any = await read_excel_file(file)
+    // console.log(data)
+    /* convert state to workbook */
   }
 
   return (
@@ -87,7 +104,8 @@ const Excel: NextPage = () => {
                 const file = event.target.files?.item(0)
                 // console.log(file)
                 if (file != null) {
-                  readExcelFile(file)
+                  // read_excel_file(file)
+                  edit_excel_file(file)
                 }
               }}
             />
@@ -97,7 +115,7 @@ const Excel: NextPage = () => {
           <Button
             variant="contained"
             onClick={() => {
-              createExcelFile()
+              create_excel_file()
             }}
           >
             Create New Excel File
